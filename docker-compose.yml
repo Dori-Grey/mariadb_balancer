@@ -1,0 +1,37 @@
+services:
+  mysql1:
+    image: mariadb:10.11.2
+    container_name: mysql1
+    restart: always
+    environment:
+      - MYSQL_DATABASE=app
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    volumes:    
+      - ./my.cnf:/etc/mysql/my.cnf
+
+  mysql2:
+    image: mariadb:10.11.2
+    container_name: mysql2
+    restart: always
+    environment:
+      - MYSQL_DATABASE=app
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./my.cnf.repl:/etc/mysql/my.cnf
+
+  haproxy:
+    image: haproxy
+    container_name: haproxy
+    restart: always
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - mysql1
+      - mysql2
+
+  app:
+      build:
+        context: .
+      restart: always
+      ports:
+        - 4567:4567
